@@ -1,120 +1,107 @@
-# State of Data Brasil
+# Dashboard State of Data Brasil
 
-Dashboard open source para investigar a evolução do mercado brasileiro de dados entre as edições
-2021 e 2025 do State of Data, com rastreabilidade, testes de qualidade e privacidade por design.
+Uma leitura das pesquisas State of Data Brazil de 2021 a 2025. O painel reúne resultados sobre
+perfil, carreira, trabalho e tecnologias usadas por profissionais de dados no Brasil.
 
-## Objetivo da primeira entrega
+Este é um projeto da [Profa. Artemisia Weyl](https://github.com/arteweyl), feito a partir dos dados
+públicos disponibilizados pela Data Hackers no Kaggle.
 
-Construir uma fundação reproduzível que:
+Há duas formas de consultar os resultados:
 
-- valide fontes imutáveis antes da ingestão;
-- harmonize mudanças de schema entre as edições sem apagar diferenças históricas;
-- nunca exponha tokens ou respostas individuais no dashboard;
-- produza indicadores anuais e segmentos com limiar mínimo de 10 respostas;
-- possa ser verificada localmente e em CI com os mesmos comandos.
+- um dashboard interativo em Streamlit;
+- uma página estática, que também oferece para download um banco DuckDB com as tabelas agregadas.
 
-O dashboard inicial responde três perguntas: como a participação evoluiu, como ela se distribui por
-região e como variou a satisfação profissional. Novas perguntas entram como incrementos pequenos,
-com contrato e teste próprios.
+## Rodando localmente
 
-## Stack
-
-| Camada | Tecnologia | Papel |
-| --- | --- | --- |
-| Ambiente | uv | Python e lockfile reproduzíveis |
-| Warehouse | DuckDB | OLAP local, portátil e sem servidor |
-| Transformação | dbt Core + dbt-duckdb | SQL versionado, linhagem, testes e documentação |
-| Produto | Streamlit + Plotly | Data app interativo em Python |
-| Publicação estática | Jinja + HTML/CSS/JS | Snapshot sem servidor de aplicação |
-| Qualidade | pytest, Ruff, mypy, dbt tests | Testes por risco, lint e análise estática |
-| Automação | pre-commit + GitHub Actions | Feedback rápido e verificações reproduzíveis |
-
-Todas as ferramentas da aplicação têm opções open source. A decisão e seus limites estão no
-[ADR 0001](docs/adr/0001-local-first-open-source-stack.md).
-
-## Licenças
-
-O código-fonte e o painel são distribuídos sob a [licença MIT](LICENSE). Os datasets não estão
-cobertos pela MIT: cada edição permanece sob a licença indicada em sua respectiva página no Kaggle.
-Consulte [data/LICENSE.md](data/LICENSE.md) antes de usar ou redistribuir dados e derivados.
-
-## Início rápido
-
-Pré-requisito: [uv](https://docs.astral.sh/uv/).
-
-Copie `.env.example` para `.env` e, se quiser autenticar a sincronização, preencha
-`KAGGLE_API_TOKEN` com o token gerado em <https://www.kaggle.com/settings/api>. O `.env` é ignorado
-pelo Git. Fontes públicas continuam funcionando sem token quando o Kaggle permitir.
+Você precisa ter o [uv](https://docs.astral.sh/uv/) instalado.
 
 ```bash
 make setup
 ./scripts/ingest.sh
 ./scripts/transform.sh
-./scripts/build_site.sh
-make quality
 make dashboard
 ```
 
-O dashboard abre em `http://localhost:8501`. O `uv.lock` deve entrar no Git e não deve ser editado
-manualmente.
+O dashboard estará em <http://localhost:8501>.
 
-Para gerar e servir a versão estática:
+Para gerar e servir a página estática:
 
 ```bash
-make static
+./scripts/build_site.sh
 python -m http.server 8000 --directory site
 ```
 
-Ela abre em `http://localhost:8000` e pode ser hospedada em qualquer serviço de arquivos estáticos.
-O build também gera `site/data/state_of_data_public.duckdb`, disponível pelo botão de download da
-página. Esse banco público contém somente marts agregados e metadados de origem; o warehouse com
-as respostas permanece local.
-Veja o [guia de publicação estática](docs/static-site.md).
+Depois, acesse <http://localhost:8000>.
 
-## Estrutura
+## Acesso ao Kaggle
 
-```text
-analytics/         modelos, testes e documentação dbt
-app/               camada de apresentação Streamlit
-data/raw/          fontes locais imutáveis e manifesto versionado
-data/warehouse/    DuckDB reconstruível e ignorado pelo Git
-docs/              decisões, governança e contratos
-site/              snapshot estático pronto para publicação
-scripts/           etapas executáveis da pipeline
-src/state_of_data/ ingestão e regras de infraestrutura
-static/            templates e assets-fonte do site estático
-tests/             testes rápidos e isolados
+Copie `.env.example` para `.env` e adicione seu token:
+
+```dotenv
+KAGGLE_API_TOKEN=seu_token_aqui
 ```
 
-## Dados e privacidade
+O token pode ser criado em <https://www.kaggle.com/settings/api>. O arquivo `.env` não entra no
+Git. Quando o Kaggle permite acesso público sem autenticação, a sincronização também funciona sem
+o token.
 
-Os CSVs não são versionados. A etapa idempotente `state-of-data sources sync` sincroniza os assets
-diretamente dos datasets públicos da Data Hackers no Kaggle e só aceita cada arquivo quando o
-SHA-256 confere com `data/raw/manifest.json`. O manifesto registra URL, slug, licença, contagem e
-checksum por edição. Se o Kaggle publicar uma nova versão, a sincronização falha até que a mudança
-seja revisada de forma explícita.
+## Como os dados são atualizados
 
-## Pipeline
+A atualização tem três etapas:
 
-O GitHub Actions é o orquestrador. O workflow `pages.yml` prepara o ambiente bloqueado pelo
-`uv.lock` e executa, em ordem, `scripts/ingest.sh`, `scripts/transform.sh` e
-`scripts/build_site.sh`. O artefato resultante só é enviado ao GitHub Pages depois que ingestão,
-testes dbt e validações de publicação terminam com sucesso.
+1. `scripts/ingest.sh` baixa os arquivos do Kaggle e confere os checksums registrados no manifesto;
+2. `scripts/transform.sh` executa os modelos e testes do dbt;
+3. `scripts/build_site.sh` gera a página estática e o DuckDB público.
 
-`uv` cuida apenas da instalação reproduzível do ambiente. As operações da pipeline chamam os
-executáveis instalados em `.venv/bin` diretamente. O workflow pode ser disparado manualmente, por
-mudanças relevantes na `main` ou pela verificação mensal do Kaggle.
+O GitHub Actions executa essas etapas na publicação e na verificação mensal das fontes. O `uv` é
+usado somente para instalar o ambiente definido pelo `uv.lock`.
 
-No GitHub, cadastre `KAGGLE_API_TOKEN` em **Settings → Secrets and variables → Actions → Repository
-secrets**. O workflow injeta o secret somente na etapa de ingestão; fontes públicas ainda podem ser
-sincronizadas sem ele quando o Kaggle permitir.
+Os arquivos originais e o warehouse completo ficam fora do Git. O DuckDB publicado contém apenas
+resultados agregados e metadados das fontes, sem respostas individuais.
 
-Antes de redistribuir dados ou derivados, registre a URL da edição correspondente e confira as
-condições exibidas pelo Kaggle. Código e dados são ativos distintos: a licença MIT do painel não
-altera nem substitui a licença das fontes.
+## Tecnologias
+
+- DuckDB para armazenamento e consultas analíticas;
+- dbt Core com dbt-duckdb para transformação e testes;
+- Streamlit e Plotly para o dashboard interativo;
+- Jinja, HTML, CSS e JavaScript para a versão estática;
+- pytest, Ruff e mypy para qualidade do código;
+- GitHub Actions para automação e publicação.
+
+Mais detalhes sobre essa escolha estão no
+[ADR 0001](docs/adr/0001-local-first-open-source-stack.md).
+
+## Estrutura do repositório
+
+```text
+analytics/         modelos e testes dbt
+app/               dashboard Streamlit
+data/raw/          manifesto e arquivos obtidos do Kaggle
+data/warehouse/    banco DuckDB local
+docs/              decisões e documentação dos dados
+scripts/           etapas da pipeline
+src/state_of_data/ código Python do projeto
+static/            templates e assets da página estática
+tests/             testes automatizados
+```
+
+O diretório `site/` é criado durante o build e não é versionado.
+
+## Licenças
+
+O código e a interface estão sob a [licença MIT](LICENSE).
+
+Os dados mantêm as licenças definidas em cada edição da pesquisa: Creative Commons entre 2021 e
+2023 e Open Database em 2024 e 2025. Consulte [data/LICENSE.md](data/LICENSE.md) antes de
+redistribuir os dados ou seus derivados.
 
 ## Desenvolvimento
 
-Leia [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md) e o
-[contrato de dados](docs/data/data-contract.md). Commits seguem Conventional Commits. `git push`
-só acontece depois de revisão e autorização explícita da proprietária do projeto.
+Para rodar todas as verificações locais:
+
+```bash
+make quality
+```
+
+As orientações para contribuir estão em [CONTRIBUTING.md](CONTRIBUTING.md). Questões de segurança
+devem seguir [SECURITY.md](SECURITY.md).
