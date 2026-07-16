@@ -1,0 +1,8 @@
+* text=auto eol=lf
+*.csv text eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.parquet binary
+*.duckdb binary
+

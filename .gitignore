@@ -1,0 +1,33 @@
+# Python
+.venv/
+.bootstrap-venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Runtime and local configuration
+.env
+.env.*
+!.env.example
+logs/
+
+# Data products (rebuild locally)
+data/raw/*.csv
+data/warehouse/*
+!data/warehouse/.gitkeep
+analytics/target/
+analytics/logs/
+analytics/dbt_packages/
+analytics/.user.yml
+site/
+
+# Streamlit and editors
+.streamlit/secrets.toml
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
