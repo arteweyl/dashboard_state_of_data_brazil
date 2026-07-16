@@ -1,0 +1,21 @@
+name: state_of_data
+version: 1.0.0
+config-version: 2
+
+profile: state_of_data
+
+model-paths: ["models"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: target
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  state_of_data:
+    +materialized: view
+    staging:
+      +schema: staging
+    marts:
+      +schema: marts
+      +materialized: table
+

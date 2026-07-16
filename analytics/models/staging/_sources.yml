@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: CSVs originais validados por checksum e ingeridos sem alteração semântica.
+    tables:
+      - name: survey_2021
+      - name: survey_2022
+      - name: survey_2023
+      - name: survey_2024
+      - name: survey_2025
+

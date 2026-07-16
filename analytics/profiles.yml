@@ -1,0 +1,9 @@
+state_of_data:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('STATE_OF_DATA_DB_PATH', 'data/warehouse/state_of_data.duckdb') }}"
+      schema: analytics
+      threads: 4
+

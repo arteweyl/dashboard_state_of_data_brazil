@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: stg_survey__respondents
+    description: >-
+      Contrato harmonizado entre as cinco pesquisas. O identificador original nunca sai da camada
+      raw; respondent_key é um hash com namespace por edição.
+    columns:
+      - name: survey_year
+        description: Ano de referência adotado para a edição da pesquisa.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [2021, 2022, 2023, 2024, 2025]
+      - name: respondent_key
+        data_tests:
+          - not_null
+          - unique
+      - name: age
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 16
+                max_value: 100
+                inclusive: true
+

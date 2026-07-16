@@ -1,0 +1,168 @@
+{% macro ranking(items) -%}
+  <ol class="ranking">
+  {% for item in items %}
+    <li>
+      <div class="ranking__label"><span>{{ item.label }}</span><strong>{{ "{:,}".format(item.respondents).replace(',', '.') }}</strong></div>
+      <div class="ranking__track" aria-hidden="true"><span style="width: {{ item.width }}%"></span></div>
+    </li>
+  {% else %}
+    <li class="empty">Não há resultado publicável para esta edição.</li>
+  {% endfor %}
+  </ol>
+{%- endmacro %}
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Projeto independente da Profa. Artemisia Weyl com resultados agregados do State of Data Brasil de 2021 a 2025.">
+    <meta name="theme-color" content="#090b1a">
+    <title>Panorama State of Data · Profa. Artemisia Weyl</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <script defer src="assets/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+    <header class="hero">
+      <div class="hero__orbit" aria-hidden="true"></div>
+      <div class="shell">
+        <p class="eyebrow">DASHBOARD DOS RESULTADOS DO STATE OF DATA</p>
+        <h1>Uma órbita pelo mercado brasileiro de dados</h1>
+        <p class="hero__lead">
+          Perfil, carreira, trabalho e tecnologias em uma página estática, construída somente com
+          resultados agrupados.
+        </p>
+        <p class="project-credit">
+          Projeto independente da <strong>Profa. Artemisia Weyl</strong>, desenvolvido com dados
+          públicos das pesquisas State of Data Brazil.
+        </p>
+        <div class="hero__meta">
+          <span>Atualizado em {{ generated_at }}</span>
+          <span>Dados de 2021 a {{ latest_year }}</span>
+          <span>Sem backend próprio ou coleta de respostas</span>
+        </div>
+        <p class="hero__download">
+          <a class="download-button" href="{{ public_database_path }}" download>
+            Baixar DuckDB público · {{ "%.1f"|format(public_database_size_mb) }} MB
+          </a>
+        </p>
+      </div>
+    </header>
+
+    <nav class="tabs shell" aria-label="Seções do painel" role="tablist">
+      {% for tab, label in [
+        ('overview', 'Visão geral'), ('profile', 'Perfil'), ('career', 'Carreira'),
+        ('work', 'Trabalho'), ('technology', 'Tecnologias'), ('quality', 'Qualidade'),
+        ('methodology', 'Metodologia')
+      ] %}
+      <button
+        class="tab{% if loop.first %} is-active{% endif %}"
+        id="tab-{{ tab }}"
+        role="tab"
+        aria-selected="{{ 'true' if loop.first else 'false' }}"
+        aria-controls="panel-{{ tab }}"
+        data-tab="{{ tab }}"
+      >{{ label }}</button>
+      {% endfor %}
+    </nav>
+
+    <main id="conteudo" class="shell">
+      <section class="panel is-active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
+        <div class="section-heading">
+          <p class="eyebrow">PANORAMA</p>
+          <h2>Visão geral</h2>
+          <p>Indicadores consolidados da edição mais recente e evolução histórica.</p>
+        </div>
+        <div class="metrics">
+          <article class="metric"><span>Respostas em {{ latest_year }}</span><strong>{{ "{:,}".format(latest.respondents).replace(',', '.') }}</strong></article>
+          <article class="metric"><span>Idade média</span><strong>{{ "%.1f"|format(latest.average_age) }}</strong></article>
+          <article class="metric"><span>Satisfação</span><strong>{{ "%.1f"|format(latest.satisfied_pct) }}%</strong></article>
+          <article class="metric"><span>Respostas harmonizadas</span><strong>{{ "{:,}".format(total_responses).replace(',', '.') }}</strong></article>
+        </div>
+        <div class="chart-grid">
+          <article class="card chart">{{ participation_chart|safe }}</article>
+          <article class="card chart">{{ satisfaction_chart|safe }}</article>
+        </div>
+        <article class="card">
+          <h3>Distribuição regional em {{ latest_year }}</h3>
+          {{ ranking(rankings.region) }}
+        </article>
+      </section>
+
+      <section class="panel" id="panel-profile" role="tabpanel" aria-labelledby="tab-profile" hidden>
+        <div class="section-heading"><p class="eyebrow">QUEM RESPONDEU</p><h2>Perfil</h2><p>Características declaradas pelos participantes da edição de {{ latest_year }}.</p></div>
+        <div class="card-grid">
+          <article class="card"><h3>Faixa etária</h3>{{ ranking(rankings.age) }}</article>
+          <article class="card"><h3>Gênero</h3>{{ ranking(rankings.gender) }}</article>
+          <article class="card"><h3>Cor, raça ou etnia</h3>{{ ranking(rankings.race) }}</article>
+          <article class="card"><h3>Escolaridade</h3>{{ ranking(rankings.education) }}</article>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-career" role="tabpanel" aria-labelledby="tab-career" hidden>
+        <div class="section-heading"><p class="eyebrow">MERCADO</p><h2>Carreira</h2><p>Cargos, níveis, remuneração e setores na edição de {{ latest_year }}.</p></div>
+        <div class="card-grid">
+          <article class="card"><h3>Cargos</h3>{{ ranking(rankings.role) }}</article>
+          <article class="card"><h3>Senioridade</h3>{{ ranking(rankings.seniority) }}</article>
+          <article class="card"><h3>Faixa salarial</h3>{{ ranking(rankings.salary) }}</article>
+          <article class="card"><h3>Setores</h3>{{ ranking(rankings.industry) }}</article>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-work" role="tabpanel" aria-labelledby="tab-work" hidden>
+        <div class="section-heading"><p class="eyebrow">ROTINA</p><h2>Trabalho</h2><p>Situação profissional e modelos de trabalho declarados em {{ latest_year }}.</p></div>
+        <div class="card-grid">
+          <article class="card"><h3>Situação profissional</h3>{{ ranking(rankings.employment) }}</article>
+          <article class="card"><h3>Modelo atual</h3>{{ ranking(rankings.current_work) }}</article>
+          <article class="card"><h3>Modelo ideal</h3>{{ ranking(rankings.ideal_work) }}</article>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-technology" role="tabpanel" aria-labelledby="tab-technology" hidden>
+        <div class="section-heading"><p class="eyebrow">FERRAMENTAS</p><h2>Tecnologias</h2><p>Plataformas de cloud citadas na edição de {{ latest_year }}.</p></div>
+        <div class="notice"><strong>Atenção à comparação:</strong> a formulação mudou entre as edições. Em 2021, a pergunta trata de uso no trabalho; em 2022–2023, preferência; em 2024–2025, uso no dia a dia. Por isso, cada ano aparece em um gráfico separado e com sua própria escala.</div>
+        <div class="cloud-chart-grid">
+        {% for chart in cloud_charts %}
+          <article class="card chart cloud-chart">{{ chart.html|safe }}</article>
+        {% endfor %}
+        </div>
+      </section>
+
+      <section class="panel" id="panel-quality" role="tabpanel" aria-labelledby="tab-quality" hidden>
+        <div class="section-heading"><p class="eyebrow">TRANSPARÊNCIA</p><h2>Qualidade dos dados</h2><p>Cobertura das perguntas na edição de {{ latest_year }}.</p></div>
+        <div class="table-wrap card">
+          <table>
+            <thead><tr><th>Pergunta</th><th>Situação</th><th>Elegíveis</th><th>Responderam</th><th>Sem resposta</th><th>Não aplicável</th><th>Cobertura</th></tr></thead>
+            <tbody>
+            {% for item in quality %}
+              <tr>
+                <td>{{ item.question_label }}</td><td>{{ item.question_status }}</td>
+                <td>{{ item.eligible_respondents }}</td><td>{{ item.answered_respondents }}</td>
+                <td>{{ item.missing_respondents }}</td><td>{{ item.not_applicable_respondents }}</td>
+                <td>{% if item.coverage_pct is not none %}{{ "%.1f"|format(item.coverage_pct) }}%{% else %}—{% endif %}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-methodology" role="tabpanel" aria-labelledby="tab-methodology" hidden>
+        <div class="section-heading"><p class="eyebrow">COMO LER</p><h2>Metodologia</h2><p>Decisões importantes para interpretar os resultados.</p></div>
+        <div class="card-grid prose">
+          <article class="card"><h3>Preparação</h3><p>Os arquivos foram verificados para detectar alterações inesperadas. Oito registros completamente repetidos foram contados apenas uma vez.</p><p>Quando outra resposta determina um valor sem ambiguidade, aplicamos uma regra lógica. Por exemplo, o cargo informado no campo de gestão completa o campo geral de cargo.</p></article>
+          <article class="card"><h3>Dados ausentes</h3><p>“Não perguntado”, “não aplicável” e “sem resposta” são situações diferentes. O site não transforma campos vazios em zero, “não” ou insatisfação e não tenta adivinhar respostas por meio de imputação estatística.</p></article>
+          <article class="card"><h3>Proteção</h3><p>Esta página e o DuckDB para download contêm somente resultados agrupados. Identificadores e respostas individuais não são exportados. Categorias com menos de 10 respostas são ocultadas.</p></article>
+          <article class="card"><h3>Limitações</h3><p>A participação foi voluntária. Os resultados descrevem quem respondeu à pesquisa e não devem ser interpretados como um censo de todas as pessoas que trabalham com dados no Brasil.</p></article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="shell footer-grid">
+        <p><strong>Licença do painel</strong><br>Código e interface sob licença MIT.</p>
+        <p><strong>Licenças dos dados</strong><br>Creative Commons nas edições de 2021 a 2023 e Open Database nas edições de 2024 e 2025.</p>
+      </div>
+    </footer>
+  </body>
+</html>

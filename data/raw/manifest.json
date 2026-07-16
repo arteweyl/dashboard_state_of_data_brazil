@@ -1,0 +1,49 @@
+{
+  "datasets": [
+    {
+      "year": 2021,
+      "file": "State of Data 2021 - Dataset - Pgina1.csv",
+      "rows": 2645,
+      "sha256": "fda6b4de591c747820e37e8aaa2c5603f01a9b8e71d208d51f6b5686f5ba4db7",
+      "kaggle_ref": "datahackers/state-of-data-2021",
+      "source_url": "https://www.kaggle.com/datasets/datahackers/state-of-data-2021",
+      "license": "CC BY-NC-SA 4.0"
+    },
+    {
+      "year": 2022,
+      "file": "State_of_data_2022.csv",
+      "rows": 4271,
+      "sha256": "3744977234706b80d7dfa49dea69bc06a6b8a43f966dd61cbff01ffe38e2e8ee",
+      "kaggle_ref": "datahackers/state-of-data-2022",
+      "source_url": "https://www.kaggle.com/datasets/datahackers/state-of-data-2022",
+      "license": "CC BY-NC-SA 3.0 IGO"
+    },
+    {
+      "year": 2023,
+      "file": "State_of_data_BR_2023_Kaggle - df_survey_2023.csv",
+      "rows": 5293,
+      "sha256": "85b7a0ab4e76bfc5ce5e72a1abe0343940faa6ef50a1772c8ce6ac13b77736ea",
+      "kaggle_ref": "datahackers/state-of-data-brazil-2023",
+      "source_url": "https://www.kaggle.com/datasets/datahackers/state-of-data-brazil-2023",
+      "license": "CC BY-NC 4.0"
+    },
+    {
+      "year": 2024,
+      "file": "Final Dataset - State of Data 2024 - Kaggle - df_survey_2024.csv",
+      "rows": 5217,
+      "sha256": "662c8bc2d660dc93a0aec7710c7a8ed63c266c65a0394a25f267b21cb69c5316",
+      "kaggle_ref": "datahackers/state-of-data-brazil-20242025",
+      "source_url": "https://www.kaggle.com/datasets/datahackers/state-of-data-brazil-20242025",
+      "license": "Open Database; contents © original authors"
+    },
+    {
+      "year": 2025,
+      "file": "Final Dataset - State of Data 2025-2026 - Kaggle.csv",
+      "rows": 3495,
+      "sha256": "6d3c59e75c09ee8a5999e95569d4b7d04a08b162df5fa65d7874196806a75af1",
+      "kaggle_ref": "datahackers/state-of-data-brazil-2025-2026",
+      "source_url": "https://www.kaggle.com/datasets/datahackers/state-of-data-brazil-2025-2026",
+      "license": "Open Database; contents © original authors"
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+version: 2
+
+models:
+  - name: annual_summary
+    description: Indicadores anuais de alto nível para os cards e a série histórica.
+    columns:
+      - name: survey_year
+        data_tests: [not_null, unique]
+      - name: respondents
+        data_tests: [not_null]
+  - name: survey_overview
+    description: >-
+      Agregados seguros para consumo pelo dashboard. Grupos com menos de 10 respostas são
+      suprimidos para reduzir risco de reidentificação.
+    columns:
+      - name: survey_year
+        data_tests: [not_null]
+      - name: respondents
+        data_tests:
+          - not_null
+      - name: satisfied_pct
+        description: Percentual de respostas satisfeitas no grupo, entre 0 e 100.
+  - name: categorical_distribution
+    description: Distribuições unidimensionais para as abas de perfil, carreira e trabalho.
+    columns:
+      - name: survey_year
+        data_tests: [not_null]
+      - name: dimension
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - region
+                  - gender
+                  - race_ethnicity
+                  - age_group
+                  - education_level
+                  - education_area
+                  - employment_status
+                  - industry
+                  - role
+                  - seniority
+                  - salary_range
+                  - current_work_model
+                  - ideal_work_model
+      - name: category
+        data_tests: [not_null]
+      - name: respondents
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 10
+                inclusive: true
+  - name: technology_cloud
+    description: Menções a plataformas de cloud, preservando o contexto da pergunta em cada edição.
+    columns:
+      - name: survey_year
+        data_tests: [not_null]
+      - name: question_context
+        data_tests: [not_null]
+      - name: cloud
+        data_tests: [not_null]
+      - name: respondents
+        data_tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 10
+                inclusive: true
+  - name: data_quality
+    description: >-
+      Cobertura por pergunta e edição, separando elegíveis, respostas ausentes, não aplicáveis e
+      perguntas que não existiam no questionário.
+    columns:
+      - name: survey_year
+        data_tests: [not_null]
+      - name: question_key
+        data_tests: [not_null]
+      - name: question_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["Disponível", "Não perguntado"]
+      - name: eligible_respondents
+        data_tests: [not_null]
+      - name: answered_respondents
+        data_tests: [not_null]
+      - name: coverage_pct
+        data_tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 100
+                inclusive: true
