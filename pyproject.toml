@@ -22,7 +22,7 @@ state-of-data = "state_of_data.cli:main"
 
 [dependency-groups]
 dev = [
-  "mypy>=1.15,<2",
+  "mypy>=2.3.0,<3",
   "pip-audit>=2.9,<3",
   "pre-commit>=4.2,<5",
   "pytest>=9.0.3,<10",
