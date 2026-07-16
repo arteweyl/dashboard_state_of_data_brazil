@@ -1,0 +1,68 @@
+name: Build data and deploy Pages
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 9 1 * *"
+  push:
+    branches: [main]
+    paths:
+      - "analytics/**"
+      - "data/raw/manifest.json"
+      - "scripts/**"
+      - "src/**"
+      - "static/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".github/workflows/pages.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8
+        with:
+          enable-cache: true
+          version: "0.11.x"
+      - name: Install locked environment
+        run: uv sync --all-groups --locked
+      - name: Synchronize and ingest sources
+        env:
+          KAGGLE_API_TOKEN: ${{ secrets.KAGGLE_API_TOKEN }}
+        run: ./scripts/ingest.sh
+      - name: Transform and test data
+        run: ./scripts/transform.sh
+      - name: Build and validate public site
+        run: ./scripts/build_site.sh
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload static artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
