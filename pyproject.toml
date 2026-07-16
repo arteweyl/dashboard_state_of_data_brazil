@@ -14,7 +14,7 @@ dependencies = [
   "pandas>=2.2,<3",
   "plotly>=6,<7",
   "streamlit>=1.45,<2",
-  "structlog>=25,<26",
+  "structlog>=26.1.0,<27",
 ]
 
 [project.scripts]
