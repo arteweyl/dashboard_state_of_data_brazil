@@ -13,7 +13,7 @@ dependencies = [
   "jinja2>=3.1,<4",
   "pandas>=2.2,<3",
   "plotly>=6,<7",
-  "streamlit>=1.45,<2",
+  "streamlit>=1.60.0,<2",
   "structlog>=25,<26",
 ]
 
